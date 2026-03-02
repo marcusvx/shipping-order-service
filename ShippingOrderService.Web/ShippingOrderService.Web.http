@@ -1,0 +1,4 @@
+GET {{hostUrl}}/api/shipments/{{id}}
+Accept: application/json
+
+###
