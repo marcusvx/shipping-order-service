@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using ShippingOrderService.Web.Domain.Shipments;
 using ShippingOrderService.Web.Infrastructure.Persistence;
 
 #nullable disable
@@ -20,14 +21,19 @@ namespace ShippingOrderService.Web.Migrations
                 .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "shipment_priority", new[] { "normal", "express", "next_day" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "shipment_status", new[] { "pending", "shipped", "cancelled", "delivered" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ShippingOrderService.Web.Features.Shipments.Shipment", b =>
+            modelBuilder.Entity("ShippingOrderService.Web.Domain.Shipments.Shipment", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                    b.Property<string>("Id")
+                        .HasColumnType("character varying(26)")
                         .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
 
                     b.Property<string>("CustomerName")
                         .IsRequired()
@@ -47,9 +53,13 @@ namespace ShippingOrderService.Web.Migrations
                         .HasColumnType("character varying(10)")
                         .HasColumnName("origin_zip_code");
 
-                    b.Property<int?>("Priority")
-                        .HasColumnType("integer")
+                    b.Property<ShipmentPriority?>("Priority")
+                        .HasColumnType("shipment_priority")
                         .HasColumnName("priority");
+
+                    b.Property<ShipmentStatus>("Status")
+                        .HasColumnType("shipment_status")
+                        .HasColumnName("status");
 
                     b.Property<decimal>("TotalValue")
                         .HasColumnType("numeric")
@@ -61,12 +71,14 @@ namespace ShippingOrderService.Web.Migrations
                     b.ToTable("shipments", (string)null);
                 });
 
-            modelBuilder.Entity("ShippingOrderService.Web.Features.Shipments.ShipmentItem", b =>
+            modelBuilder.Entity("ShippingOrderService.Web.Domain.Shipments.ShipmentItem", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -81,8 +93,8 @@ namespace ShippingOrderService.Web.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("quantity");
 
-                    b.Property<Guid>("ShipmentId")
-                        .HasColumnType("uuid")
+                    b.Property<string>("ShipmentId")
+                        .HasColumnType("character varying(26)")
                         .HasColumnName("shipment_id");
 
                     b.Property<decimal>("Weight")
@@ -98,19 +110,18 @@ namespace ShippingOrderService.Web.Migrations
                     b.ToTable("shipment_items", (string)null);
                 });
 
-            modelBuilder.Entity("ShippingOrderService.Web.Features.Shipments.ShipmentItem", b =>
+            modelBuilder.Entity("ShippingOrderService.Web.Domain.Shipments.ShipmentItem", b =>
                 {
-                    b.HasOne("ShippingOrderService.Web.Features.Shipments.Shipment", "Shipment")
+                    b.HasOne("ShippingOrderService.Web.Domain.Shipments.Shipment", null)
                         .WithMany("Items")
                         .HasForeignKey("ShipmentId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
                         .HasConstraintName("fk_shipment_items_shipments_shipment_id");
 
-                    b.OwnsOne("ShippingOrderService.Web.Features.Shipments.Dimensions", "Dimensions", b1 =>
+                    b.OwnsOne("ShippingOrderService.Web.Domain.Shipments.Dimensions", "Dimensions", b1 =>
                         {
-                            b1.Property<Guid>("ShipmentItemId")
-                                .HasColumnType("uuid")
+                            b1.Property<long>("ShipmentItemId")
+                                .HasColumnType("bigint")
                                 .HasColumnName("id");
 
                             b1.Property<decimal>("DepthCm")
@@ -138,11 +149,9 @@ namespace ShippingOrderService.Web.Migrations
                         });
 
                     b.Navigation("Dimensions");
-
-                    b.Navigation("Shipment");
                 });
 
-            modelBuilder.Entity("ShippingOrderService.Web.Features.Shipments.Shipment", b =>
+            modelBuilder.Entity("ShippingOrderService.Web.Domain.Shipments.Shipment", b =>
                 {
                     b.Navigation("Items");
                 });

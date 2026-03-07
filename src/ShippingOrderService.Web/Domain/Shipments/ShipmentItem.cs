@@ -1,18 +1,46 @@
-namespace ShippingOrderService.Web.Features.Shipments;
+using ShippingOrderService.Web.Domain.Shipments.Exceptions;
+
+namespace ShippingOrderService.Web.Domain.Shipments;
 
 public class ShipmentItem
 {
-    public Shipment? Shipment { get; set; }
+    private ShipmentItem()
+    {
+        // Empty for EF construction
+    }
 
-    public Guid Id { get; set; }
+    public static ShipmentItem Create(
+        string description,
+        decimal weight,
+        int quantity,
+        bool isFragile,
+        Dimensions? dimensions = null)
+    {
+        if (quantity <= 0)
+            throw new DomainException("Quantity must be greater than zero");
 
-    public string Description { get; set; }
+        if (weight < 0)
+            throw new DomainException("Weight must be greater than zero");
 
-    public decimal Weight { get; set; }
+        return new ShipmentItem
+        {
+            Description = description,
+            Weight = weight,
+            Quantity = quantity,
+            IsFragile = isFragile,
+            Dimensions = dimensions
+        };
+    }
 
-    public int Quantity { get; set; }
+    public long Id { get; private set; }
 
-    public bool IsFragile { get; set; }
+    public string Description { get; private set; }
 
-    public Dimensions? Dimensions { get; set; }
+    public decimal Weight { get; private set; }
+
+    public int Quantity { get; private set; }
+
+    public bool IsFragile { get; private set; }
+
+    public Dimensions? Dimensions { get; private set; }
 }

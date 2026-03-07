@@ -1,6 +1,7 @@
 // Configuration/DatabaseConfiguration.cs
 
 using Microsoft.EntityFrameworkCore;
+using ShippingOrderService.Web.Domain.Shipments;
 using ShippingOrderService.Web.Infrastructure.Persistence;
 using ShippingOrderService.Web.Infrastructure.Persistence.Seeders;
 
@@ -17,6 +18,9 @@ public static class DatabaseConfiguration
                     configuration.GetConnectionString("Default"),
                     npgsqlOptions =>
                     {
+                        npgsqlOptions.MapEnum<ShipmentStatus>();
+                        npgsqlOptions.MapEnum<ShipmentPriority>();
+
                         npgsqlOptions.EnableRetryOnFailure(
                             maxRetryCount: 3,
                             maxRetryDelay: TimeSpan.FromSeconds(30),

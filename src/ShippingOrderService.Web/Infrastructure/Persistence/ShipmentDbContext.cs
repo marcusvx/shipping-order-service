@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using ShippingOrderService.Web.Features.Shipments;
+using ShippingOrderService.Web.Domain.Shipments;
+using ShippingOrderService.Web.Infrastructure.Persistence.Configurations.Converters;
 
 namespace ShippingOrderService.Web.Infrastructure.Persistence;
 
@@ -9,7 +10,17 @@ public class ShipmentDbContext(DbContextOptions<ShipmentDbContext> options) : Db
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresEnum<ShipmentStatus>();
+        modelBuilder.HasPostgresEnum<ShipmentPriority>();
+
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(ShipmentDbContext).Assembly);
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder
+            .Properties<Ulid>()
+            .HaveConversion<UlidToStringConverter>();
     }
 }

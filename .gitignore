@@ -15,6 +15,9 @@
 **/[Ll]og/
 **/[Ll]ogs/
 
+# For some reason this directory got created in MacOS after running some commands
+**/[Bb]in\\Debug
+
 # MSBuild Binary and Structured Log
 *.binlog
 
@@ -227,3 +230,5 @@ appsettings.Local.json
 # Entity Framework migrations backup (gerado pelo dotnet ef)
 efpt.config.json
 efpt.renaming.json
+
+build/

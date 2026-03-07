@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using ShippingOrderService.Web.Domain.Shipments;
 using ShippingOrderService.Web.Features.Shipments;
 
 namespace ShippingOrderService.Web.Infrastructure.Persistence.Configurations;
@@ -9,7 +10,7 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
     public void Configure(EntityTypeBuilder<Shipment> builder)
     {
         builder.ToTable("shipments");
-        
+
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.CustomerName)
@@ -25,10 +26,16 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
             .IsRequired()
             .HasMaxLength(10);
 
-        builder.HasMany(x => x.Items).WithOne(x => x.Shipment).IsRequired();
-
         builder.Property(p => p.TotalValue).IsRequired();
 
         builder.Property(p => p.Priority);
+
+        builder.HasMany(s => s.Items)
+            .WithOne()
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(s => s.Items)
+            .UsePropertyAccessMode(PropertyAccessMode.Field)
+            .HasField("_items");
     }
 }

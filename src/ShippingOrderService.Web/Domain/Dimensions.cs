@@ -1,4 +1,4 @@
-namespace ShippingOrderService.Web.Features.Shipments;
+namespace ShippingOrderService.Web.Domain.Shipments;
 
 public record Dimensions(
     decimal WidthCm,

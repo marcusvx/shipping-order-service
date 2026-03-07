@@ -1,4 +1,26 @@
+### Get shipment by id
 GET {{hostUrl}}/api/shipments/{{id}}
 Accept: application/json
 
-###
+### Create a shipment
+POST {{hostUrl}}/api/shipments
+Content-Type: application/json
+
+{
+  "customer_name": "John Doe",
+  "origin_zip_code": "03288-010",
+  "destination_zip_code": "03255-100",
+  "destination_zip_code": "03255-100",
+  "total_value": 123.33,
+  "priority": "Normal",
+  "items": [
+    {
+      "description": "Led Monitor 24 inches QHD",
+      "quantity": 1,
+      "weight": 2.3,
+      "dimensions_height": 42.1,
+      "dimensions_width": 63.2,
+      "dimensions_depth": 12.4
+    }
+  ]
+}

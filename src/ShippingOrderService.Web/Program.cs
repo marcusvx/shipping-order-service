@@ -6,7 +6,9 @@ builder.Services
     .AddDatabase(builder.Configuration)
     .AddShipment()
     .AddOpenApiDocs()
-    .AddControllers();
+    .AddValidation()
+    .AddJsonOptions()
+    .AddRouteConstraints();
 
 var app = builder.Build();
 app.UseOpenApiDocs();

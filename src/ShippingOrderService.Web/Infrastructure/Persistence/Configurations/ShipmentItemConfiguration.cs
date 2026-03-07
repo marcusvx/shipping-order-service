@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using ShippingOrderService.Web.Features.Shipments;
+using ShippingOrderService.Web.Domain.Shipments;
 
 namespace ShippingOrderService.Web.Infrastructure.Persistence.Configurations;
 
@@ -9,7 +9,7 @@ public class ShipmentItemConfiguration : IEntityTypeConfiguration<ShipmentItem>
     public void Configure(EntityTypeBuilder<ShipmentItem> builder)
     {
         builder.ToTable("shipment_items");
-        
+
         builder.HasKey(c => c.Id);
         builder.Property(c => c.Description)
             .IsRequired();
