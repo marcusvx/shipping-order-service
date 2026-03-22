@@ -70,4 +70,60 @@ public class ShipmentsControllerTests
         var response = badRequestObjectResult.Value.ShouldBeOfType<ValidationProblemDetails>();
         response.Errors.ShouldContainKey("CustomerName");
     }
+
+    [Fact]
+    public async Task Test_GetById_ShouldReturnOkResultWithShipment_WhenShipmentExists()
+    {
+        // Arrange
+        var shipmentId = Ulid.NewUlid();
+        var expectedShipment = _shipmentFaker.Generate();
+        _shipmentServiceMock.Setup(x => x.GetById(shipmentId))
+            .ReturnsAsync(expectedShipment);
+
+        // Act
+        var result = await _controller.GetById(shipmentId);
+
+        // Assert
+        var okResult = result.ShouldBeOfType<OkObjectResult>();
+        okResult.Value.ShouldBe(expectedShipment);
+    }
+
+    [Fact]
+    public async Task Test_GetById_ShouldReturnNotFoundResult_WhenShipmentDoesNotExist()
+    {
+        // Arrange
+        var shipmentId = Ulid.NewUlid();
+        _shipmentServiceMock.Setup(x => x.GetById(shipmentId))
+            .ReturnsAsync((Shipment)null!);
+
+        // Act
+        var result = await _controller.GetById(shipmentId);
+
+        // Assert
+        result.ShouldBeOfType<NotFoundResult>();
+    }
+
+    [Fact]
+    public async Task Test_Create_ShouldReturnOkResultWithFailure_WhenServiceFails()
+    {
+        // Arrange
+        var request = _requestFaker.Generate();
+        var validationResult = new ValidationResult();
+        _validatorMock.Setup(x => x.ValidateAsync(request, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(validationResult);
+
+        var errorMessage = "Service failure";
+        _shipmentServiceMock.Setup(x => x.Create(request))
+            .ReturnsAsync(DomainResult<Shipment>.Failure(errorMessage));
+
+        // Act
+        var result = await _controller.Create(request);
+
+        // Assert
+        var okResult = result.ShouldBeOfType<OkObjectResult>();
+        var response = okResult.Value.ShouldBeOfType<DomainResult<Shipment>>();
+        response.IsSuccess.ShouldBeFalse();
+        response.Error.ShouldBe(errorMessage);
+        response.Status.ShouldBe(ResultStatus.Failure);
+    }
 }

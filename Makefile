@@ -16,6 +16,7 @@ reset:clean
 	@echo "Removing bin and obj directories..."
 	find . -type d -name "bin" ! -path "./.git/*" -exec rm -rf {} +
 	find . -type d -name "obj" ! -path "./.git/*" -exec rm -rf {} +
+	rm -rf build
 
 restore:
 	@echo "Restoring dependencies..."
