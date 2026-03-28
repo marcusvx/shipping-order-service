@@ -1,0 +1,41 @@
+﻿services:
+  postgres:
+    image: postgres:18.3
+    container_name: shipping-postgres
+    environment:
+      POSTGRES_DB: shipping
+      POSTGRES_USER: shipping_user
+      POSTGRES_PASSWORD: P455w0rd
+      POSTGRES_MULTIPLE_DATABASES: keycloak
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./docker/postgres:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U shipping_user -d shipping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  keycloak:
+    image: keycloak/keycloak:26.5.6
+    container_name: shipping-keycloak
+    command: start-dev --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: shipping_user
+      KC_DB_PASSWORD: P455w0rd
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin@pass
+    volumes:
+      - ./docker/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
